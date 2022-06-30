@@ -42,6 +42,10 @@ export default function App() {
       setList([])
     }
   }
+  const handleListClick = (index) => {
+    setText(text + list[index])
+    updatePinyin('')
+  }
 
   // text
   const [text, setText] = React.useState('')
@@ -160,7 +164,7 @@ export default function App() {
                           <>
                             {index ? <Divider /> : null}
                             <ListItem key={index} disablePadding>
-                              <ListItemButton>
+                              <ListItemButton onClick={(e) => handleListClick(index)}>
                                 <ListItemText primary={(index+1) + ". " + item} />
                               </ListItemButton>
                             </ListItem>
