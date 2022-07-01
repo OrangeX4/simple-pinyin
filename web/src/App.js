@@ -53,19 +53,19 @@ export default function App() {
     setText(event.target.value)
   }
   const handleKeydown = (event) => {
-    // a-zA-Z
+    // a-z，拼音输入
     if (event.keyCode >= 65 && event.keyCode <= 90) {
       event.preventDefault()
       updatePinyin(pinyin + event.key)
     }
-    // backspace
+    // backspace，退格
     if (event.keyCode === 8) {
       if (pinyin.length > 0) {
         event.preventDefault()
         updatePinyin(pinyin.substring(0, pinyin.length - 1))
       }
     }
-    // 1-9
+    // 1-9，选择词语
     if (event.keyCode >= 49 && event.keyCode <= 57) {
       if (parseInt(event.key) <= list.length) {
         event.preventDefault()
@@ -73,7 +73,7 @@ export default function App() {
         updatePinyin('')
       }
     }
-    // enter of space
+    // enter or space，选择第一个词语
     if (event.key === 'Enter' || event.key === ' ') {
       if (list.length) {
         event.preventDefault()
