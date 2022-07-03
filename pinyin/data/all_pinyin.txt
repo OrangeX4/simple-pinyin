@@ -29,7 +29,6 @@ cao
 ce
 cen
 ceng
-ch
 cha
 chai
 chan
@@ -307,7 +306,6 @@ sao
 se
 sen
 seng
-sh
 sha
 shai
 shan
@@ -406,7 +404,6 @@ ze
 zei
 zen
 zeng
-zh
 zha
 zhai
 zhan

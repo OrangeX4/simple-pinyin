@@ -29,8 +29,8 @@ def cut_pinyin(pinyin: str, is_intact=False, is_break=True):
     if pinyin in ans_dict:
         return ans_dict[pinyin]
     # 如果 is_break, 就进行分割
-    if is_break and "'" in pinyin:
-        pinyins = pinyin.split("'")
+    if is_break and '\'' in pinyin:
+        pinyins = pinyin.split('\'')
         components = [cut_pinyin(p, is_intact, False) for p in pinyins]
         ans = components[0]
         for i in range(1, len(components)):
