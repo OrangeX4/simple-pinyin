@@ -19,7 +19,7 @@ from pinyin.train.train_hmm import (
     gen_emission
 )
 
-if __name__ == '__main__':
+def train_hmm():
     print('Start training HMM model...')
     print('Generate start vector...')
     gen_start()
@@ -29,3 +29,5 @@ if __name__ == '__main__':
     gen_emission()
     print('Done.')
 
+if __name__ == '__main__':
+    train_hmm()
