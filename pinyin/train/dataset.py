@@ -2,8 +2,8 @@
 数据集的接口, 读取数据集
 '''
 
-words_path = './data/test_words.txt'
-# words_path = './data/global_wordfreq.release.txt'
+# words_path = './data/test_words.txt'
+words_path = './data/global_wordfreq.release.txt'
 
 def set_words_path(path):
     global words_path
@@ -13,10 +13,7 @@ def is_Chinese(word):
     '''
     判断一个字符串是否全由汉字组成, 用于过滤文本
     '''
-    for ch in word:
-        if '\u4e00' <= ch <= '\u9fff':
-            return True
-    return False
+    return all('\u4e00' <= ch <= '\u9fff' for ch in word)
 
 def iter_word_and_freq():
     """

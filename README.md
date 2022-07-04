@@ -170,21 +170,21 @@ def is_Chinese(word):
     '''
     判断一个字符串是否全由汉字组成, 用于过滤文本
     '''
-    for ch in word:
-        if '\u4e00' <= ch <= '\u9fff':
-            return True
-    return False
+    return all('\u4e00' <= ch <= '\u9fff' for ch in word)
 
 def iter_word_and_freq():
     """
     词频数据集, 迭代地返回 (word, freq)
     """
-    with open(words_path, 'r', ) as f:
+    with open(words_path, 'r', encoding='utf-8') as f:
         for line in f:
-            word, frequency = line.split()
-            # 进行过滤
-            if is_Chinese(word):
-                yield word, int(frequency)
+            try:
+                word, frequency = line.split()
+                # 进行过滤
+                if is_Chinese(word):
+                    yield word, int(frequency)
+            except Exception as e:
+                pass
 ```
 
 
