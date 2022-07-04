@@ -3,6 +3,8 @@ Author: OrangeX4
 Date: 2022-07-04
 
 本部分代码参考 https://github.com/LiuRoy/Pinyin_Demo
+
+主要思想是极大似然估计法, 在此处具体可以认为是「以频率计算概率」的方法
 '''
 
 from math import log
@@ -18,9 +20,14 @@ import json
 hmm_start_path = 'data/hmm_start.json'
 hmm_transition_path = 'data/hmm_transition.json'
 hmm_emission_path = 'data/hmm_emission.json'
+# 保存中间计算结果
 hmm_start_counter_path = 'data/checkpoints/hmm_start_counter.json'
 hmm_transition_counter_path = 'data/checkpoints/hmm_transition_counter.json'
 hmm_emission_counter_path = 'data/checkpoints/hmm_emission_counter.json'
+# 倒查表
+hmm_reversed_emission_path = 'data/hmm_reversed_emission.json'
+hmm_reversed_transition_path = 'data/hmm_reversed_transition.json'
+
 
 # 拼音简写的权重
 _config = {
@@ -131,3 +138,35 @@ def gen_emission():
         json2file(emission_counter, hmm_emission_counter_path)  # 便于后续累计计算
     # 保存为 JSON 格式
     json2file(emission_matrix, hmm_emission_path)
+
+
+def gen_reversed_matrix(emission_matrix, transition_matrix):
+    '''
+    生成 emission_matrix 的倒查表, 即 reversed_emission_matrix[拼音] = {汉字: 概率}
+
+    生成 transition_matrix 和 emission_matrix 的联合倒查表,
+    即 reversed_transition_matrix[前一个汉字][拼音] = (后一个汉字, 最大概率)
+    '''
+    # 生成 emission_matrix 的倒查表, 即 reversed_emission_matrix[拼音] = {汉字: 概率}
+    reversed_emission_matrix = {}
+    for char in tqdm(emission_matrix):
+        for pinyin, prob in emission_matrix[char].items():
+            if pinyin not in reversed_emission_matrix:
+                reversed_emission_matrix[pinyin] = {}
+            reversed_emission_matrix[pinyin][char] = prob
+    json2file(reversed_emission_matrix, hmm_reversed_emission_path)
+
+    # 生成 transition_matrix 和 emission_matrix 的联合倒查表,
+    # 即 reversed_transition_matrix[前一个汉字][拼音] = (后一个汉字, 最大概率)
+    reversed_transition_matrix = {}
+    for previous in tqdm(transition_matrix):
+        reversed_transition_matrix[previous] = {}
+        for behind in transition_matrix[previous]:
+            for pinyin in emission_matrix[behind]:
+                prob = transition_matrix[previous][behind] + emission_matrix[behind][pinyin]
+                if pinyin not in reversed_transition_matrix[previous]:
+                    reversed_transition_matrix[previous][pinyin] = (behind, prob)
+                elif prob > reversed_transition_matrix[previous][pinyin][1]:
+                    reversed_transition_matrix[previous][pinyin] = (behind, prob)
+                    
+    json2file(reversed_transition_matrix, hmm_reversed_transition_path)
