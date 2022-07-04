@@ -47,9 +47,64 @@ def cut_pinyin(pinyin: str, is_intact=False, is_break=True):
     ans_dict[pinyin] = ans
     return ans
 
+def cut_pinyin_with_error_correction(pinyin: str):
+    '''
+    纠错匹配, 从第二个字母开始, 依次交换两个连续字母并进行*完整划分*.
+    如果完整划分返回非空列表, 即匹配成功, 并加入到返回字典中.
+    pinyin: 待纠错划分的拼音
+
+    return: 返回字典, 字典的 key 为纠错后的拼音序列, value 为匹配成功的划分结果.
+            并且会包含一个 key = 'all' 的项, 包括了所有 value.
+    '''
+    ans = {}
+    for i in range(1, len(pinyin) - 1):
+        key = pinyin[:i] + pinyin[i + 1] + pinyin[i] + pinyin[i + 2:]
+        value = cut_pinyin(key, is_intact=True)
+        if value:
+            ans[key] = value
+    ans['all'] = [p for t in ans.values() for p in t]
+    return ans
+
+def cut_pinyin_with_strategy(pinyin: str):
+    '''
+    使用各种策略对拼音进行划分, 其中包括:
+    1. 完整划分
+    2. 去尾字母完整划分
+    3. 纠错划分
+    4. 去尾字母纠错划分
+    5. 结果综合 (不含模糊划分)
+    6. 模糊划分
+
+    pinyin: 待划分的拼音
+
+    return: {
+        'intact': [...],
+        'intact_tail': [...],
+        'error_correction': [...],
+        'error_correction_tail': [...],
+        'combine': [...],
+        'fuzzy': [...]
+    }
+    '''
+    ans = {
+        'intact': cut_pinyin(pinyin, is_intact=True),
+        'intact_tail': [] if pinyin[-1] not in all_pinyin_set else [t + (pinyin[-1],) for t in cut_pinyin(pinyin[:-1], is_intact=True)],
+        'error_correction': cut_pinyin_with_error_correction(pinyin)['all'],
+        'error_correction_tail': [] if pinyin[-1] not in all_pinyin_set else [t + (pinyin[-1],) for t in cut_pinyin_with_error_correction(pinyin[:-1])['all']],
+        'combine': [],
+        'fuzzy': cut_pinyin(pinyin, is_intact=False)
+    }
+    ans['combine'] = ans['intact'] + ans['intact_tail'] + ans['error_correction'] + ans['error_correction_tail']
+    return ans
+
 
 if __name__ == '__main__':
-    print(cut_pinyin('kongjian', True))
+    # print(cut_pinyin('kongjian', True))
     assert cut_pinyin('kongjian', True) == [('kong', 'jian'), ('kong', 'ji', 'an')]
-    print(cut_pinyin('zhang\'an\'gai', True))
-    assert cut_pinyin('zhang\'an\'gai', True) == [('zhang', 'an', 'gai'), ('zh', 'ang', 'an', 'gai')]
+    # print(cut_pinyin('zhang\'an\'gai', True))
+    assert cut_pinyin('zhang\'an\'gai', True) == [('zhang', 'an', 'gai')]
+    
+    # print(cut_pinyin_with_error_correction('tain'))
+    assert cut_pinyin_with_error_correction('tain') == {'tian': [('tian',), ('ti', 'an')], 'tani': [('ta', 'ni')], 'all': [('tian',), ('ti', 'an'), ('ta', 'ni')]}
+    # print(cut_pinyin_with_strategy('kauil')['error_correction_tail'])
+    assert cut_pinyin_with_strategy('kauil')['error_correction_tail'] == [('kuai', 'l'), ('ku', 'ai', 'l')]

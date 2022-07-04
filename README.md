@@ -19,5 +19,18 @@
 
 用户输入拼音序列划分只需要使用简单的动态规划即可实现，将所有合法的拼音序列划分方式都给列举出来，然后同时进行预测。
 
+首先是输入拼音序列的划分, 可以通过 `from pinyin.cut import cut_pinyin` 引入:
 
+```python
+def cut_pinyin(pinyin: str, is_intact=False, is_break=True):
+    '''
+    进行拼音划分, 返回拼音划分结果列表
+    pinyin: 待划分的拼音, 并且是无空格字符串, 例如 `kongjian`
+    is_intact: 拼音是否需要完整匹配, 默认为 False, 可以使用残缺部分的拼音进行分词
+    is_break: 是否开启分隔符, 开启后可以使用 ' 进行分割, 例如 `kong'jian`
+    
+    return: 拼音划分结果列表, 例如 `cut_pinyin('kongjian', True)` 会返回 `[('kong', 'jian'), ('kong', 'ji', 'an')]`
+    '''
+```
 
+其次是文字转拼音后划分, 这时候拼音划分是已知的, 所以只需进行简写处理, 然后给不同简化方式 **划分权重** 即可.
