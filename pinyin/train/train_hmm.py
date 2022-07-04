@@ -18,9 +18,13 @@ import json
 hmm_start_path = 'data/hmm_start.json'
 hmm_transition_path = 'data/hmm_transition.json'
 hmm_emission_path = 'data/hmm_emission.json'
+hmm_start_counter_path = 'data/checkpoints/hmm_start_counter.json'
+hmm_transition_counter_path = 'data/checkpoints/hmm_transition_counter.json'
+hmm_emission_counter_path = 'data/checkpoints/hmm_emission_counter.json'
 
 # 拼音简写的权重
 _config = {
+    'is_save_counter': True,
     'intact_weight': 5,
     'first_letter_weight': 3,
     'fuzzy_weight': 1,
@@ -31,6 +35,7 @@ def set_config(config):
     """
     设置拼音简写的权重, 默认为
     config = {
+        'is_save_counter': True,
         'intact_weight': 5,
         'first_letter_weight': 3,
         'fuzzy_weight': 1,
@@ -59,8 +64,11 @@ def gen_start():
     for ch, count in start_counter.items():
         # 除以总计数并取对数
         start_vector[ch] = log(count / total_count)
+    if _config['is_save_counter']:
+        json2file(start_counter, hmm_start_counter_path)  # 便于后续累计计算
     # 保存为 JSON 格式
     json2file(start_vector, hmm_start_path)
+    
 
 
 def gen_transition():
@@ -82,6 +90,8 @@ def gen_transition():
         transition_matrix[previous] = {}
         for behind, freq in behind_map.items():
             transition_matrix[previous][behind] = log(freq / sum_frequency)
+    if _config['is_save_counter']:
+        json2file(transition_counter, hmm_transition_counter_path)  # 便于后续累计计算
     # 保存为 JSON 格式
     json2file(transition_matrix, hmm_transition_path)
 
@@ -117,5 +127,7 @@ def gen_emission():
         emission_matrix[ch] = {}
         for pinyin, freq in pinyin_map.items():
             emission_matrix[ch][pinyin] = log(freq / sum_frequency)
+    if _config['is_save_counter']:
+        json2file(emission_counter, hmm_emission_counter_path)  # 便于后续累计计算
     # 保存为 JSON 格式
     json2file(emission_matrix, hmm_emission_path)
