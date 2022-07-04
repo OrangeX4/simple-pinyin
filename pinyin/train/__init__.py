@@ -27,13 +27,13 @@ def file2json(filename):
 
 def train_hmm():
     print('Start training HMM model...')
-    # print('Generate start vector...')
-    # gen_start()
-    # print('Generate transition matrix...')
-    # gen_transition()
-    # print('Generate emission matrix...')
-    # gen_emission()
-    # print('Generate reversed emission matrix...')
+    print('Generate start vector...')
+    gen_start()
+    print('Generate transition matrix...')
+    gen_transition()
+    print('Generate emission matrix...')
+    gen_emission()
+    print('Generate reversed emission matrix...')
     transition_path = 'data/hmm_transition.json'
     emission_path = 'data/hmm_emission.json'
     transition_matrix = file2json(transition_path)

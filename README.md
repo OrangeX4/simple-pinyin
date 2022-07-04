@@ -91,6 +91,9 @@ def cut_pinyin_with_error_correction(pinyin: str):
     '''
     ans = {}
     for i in range(1, len(pinyin) - 1):
+        # 避免交换分词符
+        if pinyin[i] == '\'' or pinyin[i + 1] == ' ':
+            continue
         key = pinyin[:i] + pinyin[i + 1] + pinyin[i] + pinyin[i + 2:]
         value = cut_pinyin(key, is_intact=True)
         if value:
@@ -109,23 +112,20 @@ def cut_pinyin_with_strategy(pinyin: str):
     2. 去尾字母完整划分
     3. 纠错划分
     4. 去尾字母纠错划分
-    5. 结果综合 (不含模糊划分)
-    6. 模糊划分
+    5. 模糊划分
+    6. 结果综合
 
     pinyin: 待划分的拼音
     '''
     ans = {
         'intact': cut_pinyin(pinyin, is_intact=True),
-        'intact_tail': [] if pinyin[-1] not in all_pinyin_set 
-            else [t + (pinyin[-1],) for t in cut_pinyin(pinyin[:-1], is_intact=True)],
+        'intact_tail': [] if pinyin[-1] not in all_pinyin_set else [t + (pinyin[-1],) for t in cut_pinyin(pinyin[:-1], is_intact=True)],
         'error_correction': cut_pinyin_with_error_correction(pinyin)['all'],
-        'error_correction_tail': [] if pinyin[-1] not in all_pinyin_set 
-            else [t + (pinyin[-1],) for t in cut_pinyin_with_error_correction(pinyin[:-1])['all']],
+        'error_correction_tail': [] if pinyin[-1] not in all_pinyin_set else [t + (pinyin[-1],) for t in cut_pinyin_with_error_correction(pinyin[:-1])['all']],
+        'fuzzy': cut_pinyin(pinyin, is_intact=False),
         'combine': [],
-        'fuzzy': cut_pinyin(pinyin, is_intact=False)
     }
-    ans['combine'] = ans['intact'] + ans['intact_tail'] 
-        + ans['error_correction'] + ans['error_correction_tail']
+    ans['combine'] = set(ans['intact'] + ans['intact_tail'] + ans['error_correction'] + ans['error_correction_tail'] + ans['fuzzy'])
     return ans
 ```
 
@@ -285,3 +285,105 @@ $\pi, A, B$ 称为隐马尔可夫模型三要素。
 隐马尔可夫模型的预测问题，也称为解码 (decoding) 问题，就是在已知隐马尔可夫模型 $\lambda=(\pi, A, B)$ 和观测序列 $O=(o_1, o_2, \cdots, o_{T})$ 的情况下，求使得观测序列条件概率 $P(I|O)$ 最大的状态序列 $I=(i_1, i_2, \cdots, i_{T})$. 即给定观测序列，求最有可能的状态序列。
 
 这里我们使用维特比算法 (Viterbi algorithm) 来进行预测。
+
+为了加速维特比算法, 我们要先通过倒查表的方式计算出 `reversed_emission_matrix` 和 `reversed_transition_matrix`.
+
+```python
+def gen_reversed_matrix(emission_matrix, transition_matrix):
+    '''
+    生成 emission_matrix 的倒查表, 即 reversed_emission_matrix[拼音] = {汉字: 概率}
+
+    生成 transition_matrix 和 emission_matrix 的联合倒查表,
+    即 reversed_transition_matrix[前一个汉字][拼音] = (后一个汉字, 最大概率)
+    '''
+    # 生成 emission_matrix 的倒查表, 即 reversed_emission_matrix[拼音] = {汉字: 概率}
+    reversed_emission_matrix = {}
+    for char in tqdm(emission_matrix):
+        for pinyin, prob in emission_matrix[char].items():
+            if pinyin not in reversed_emission_matrix:
+                reversed_emission_matrix[pinyin] = {}
+            reversed_emission_matrix[pinyin][char] = prob
+    json2file(reversed_emission_matrix, hmm_reversed_emission_path)
+
+    # 生成 transition_matrix 和 emission_matrix 的联合倒查表,
+    # 即 reversed_transition_matrix[前一个汉字][拼音] = (后一个汉字, 最大概率)
+    reversed_transition_matrix = {}
+    for previous in tqdm(transition_matrix):
+        reversed_transition_matrix[previous] = {}
+        for behind in transition_matrix[previous]:
+            for pinyin in emission_matrix[behind]:
+                prob = transition_matrix[previous][behind] + emission_matrix[behind][pinyin]
+                if pinyin not in reversed_transition_matrix[previous]:
+                    reversed_transition_matrix[previous][pinyin] = (behind, prob)
+                elif prob > reversed_transition_matrix[previous][pinyin][1]:
+                    reversed_transition_matrix[previous][pinyin] = (behind, prob)
+    json2file(reversed_transition_matrix, hmm_reversed_transition_path)
+```
+
+然后是维特比算法的具体代码:
+
+```python
+def viterbi(pinyin, limit=10):
+    """
+    viterbi 算法
+
+    pinyin: 拼音元组
+
+    return: 返回 limit 个最可能的汉字序列, 但是是 1 个全局最优解和 limit - 1 个局部最优解
+    """
+    # 初始化, 找出第一个拼音对应的汉字以及 start 和 emission 概率之积 (对数下为相加)
+    char_and_prob = ((ch, start_vector[ch] + reversed_emission_matrix[pinyin[0]][ch]) for ch in reversed_emission_matrix[pinyin[0]])
+    # 取出概率最大的 limit 个
+    V = {char: prob for char, prob in heapq.nlargest(limit, char_and_prob, key=lambda x: x[1])}
+
+    for i in range(1, len(pinyin)):
+        py = pinyin[i]
+
+        prob_map = {}
+        for phrase, prob in V.items():
+            previous = phrase[-1]
+            if py in reversed_transition_matrix[previous]:
+                state, new_prob = reversed_transition_matrix[previous][py]
+                prob_map[phrase + state] = new_prob + prob
+
+        if prob_map:
+            V = prob_map
+        else:
+            return V
+    return sorted(V.items(), key=lambda x: x[1], reverse=True)
+```
+
+最后综合我们的分词功能和维特比算法，即可得到一个较为智能的输入法了。
+
+```python
+# 缓存结果, 加快判断
+dp = {}
+def ime(pinyin: str, limit=7):
+    '''
+    输入法函数, 综合分词和维特比算法的最终结果
+    '''
+    if pinyin in dp:
+        return dp[pinyin][:limit]
+    # 计算结果
+    result = []
+    # 获取分词结果
+    cut = cut_pinyin_with_strategy(normlize_pinyin(pinyin))
+    for pinyin in cut['combine']:
+        try:
+            result.extend([(pinyin,) + t for t in viterbi(pinyin)])
+        except Exception as e:
+            pass
+    # 排序并取出前 limit 个
+    dp[pinyin] = sorted(result, key=lambda x: x[2], reverse=True)
+    return dp[pinyin][:limit]
+
+
+if __name__ == '__main__':
+    print(ime('jintian'))  # 基础功能
+    print(ime('jintain'))  # 纠错功能
+    print(ime('ji\'ntian'))  # 分词功能
+    print(ime('jintiantianqibucuo'))  # 短句功能
+    print(ime('jttqbc'))  # 首字母功能
+```
+
+

@@ -9,8 +9,6 @@ date: 2022-07-04
 
 import json
 import heapq
-import sys
-sys.path.append('../')
 
 def file2json(filename):
     with open(filename, 'r', encoding='utf-8') as f:
@@ -29,7 +27,7 @@ def viterbi(pinyin, limit=10):
     """
     viterbi 算法
 
-    pinyin: 拼音元组
+    pinyin: 拼音元组, 例如 ('jin', 'tian')
 
     return: 返回 limit 个最可能的汉字序列, 但是是 1 个全局最优解和 limit - 1 个局部最优解
     """
@@ -52,8 +50,9 @@ def viterbi(pinyin, limit=10):
             V = prob_map
         else:
             return V
-    return V
+    return sorted(V.items(), key=lambda x: x[1], reverse=True)
 
 
 if __name__ == '__main__':
-    print(viterbi(('j', 't', 't', 'q', 'b', 'c')))
+    print(viterbi(('jin', 'tian', 'tian', 'qi', 'bu', 'cuo')))
+    print(viterbi(('ni', 'h')))

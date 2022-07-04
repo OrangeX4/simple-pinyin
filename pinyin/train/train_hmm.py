@@ -168,5 +168,4 @@ def gen_reversed_matrix(emission_matrix, transition_matrix):
                     reversed_transition_matrix[previous][pinyin] = (behind, prob)
                 elif prob > reversed_transition_matrix[previous][pinyin][1]:
                     reversed_transition_matrix[previous][pinyin] = (behind, prob)
-                    
     json2file(reversed_transition_matrix, hmm_reversed_transition_path)

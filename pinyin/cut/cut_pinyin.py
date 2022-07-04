@@ -63,6 +63,9 @@ def cut_pinyin_with_error_correction(pinyin: str):
     '''
     ans = {}
     for i in range(1, len(pinyin) - 1):
+        # 避免交换分词符
+        if pinyin[i] == '\'' or pinyin[i + 1] == ' ':
+            continue
         key = pinyin[:i] + pinyin[i + 1] + pinyin[i] + pinyin[i + 2:]
         value = cut_pinyin(key, is_intact=True)
         if value:
@@ -77,8 +80,8 @@ def cut_pinyin_with_strategy(pinyin: str):
     2. 去尾字母完整划分
     3. 纠错划分
     4. 去尾字母纠错划分
-    5. 结果综合 (不含模糊划分)
-    6. 模糊划分
+    5. 模糊划分
+    6. 结果综合
 
     pinyin: 待划分的拼音
 
@@ -87,8 +90,8 @@ def cut_pinyin_with_strategy(pinyin: str):
         'intact_tail': [...],
         'error_correction': [...],
         'error_correction_tail': [...],
-        'combine': [...],
         'fuzzy': [...]
+        'combine': [...],
     }
     '''
     ans = {
@@ -96,10 +99,10 @@ def cut_pinyin_with_strategy(pinyin: str):
         'intact_tail': [] if pinyin[-1] not in all_pinyin_set else [t + (pinyin[-1],) for t in cut_pinyin(pinyin[:-1], is_intact=True)],
         'error_correction': cut_pinyin_with_error_correction(pinyin)['all'],
         'error_correction_tail': [] if pinyin[-1] not in all_pinyin_set else [t + (pinyin[-1],) for t in cut_pinyin_with_error_correction(pinyin[:-1])['all']],
+        'fuzzy': cut_pinyin(pinyin, is_intact=False),
         'combine': [],
-        'fuzzy': cut_pinyin(pinyin, is_intact=False)
     }
-    ans['combine'] = ans['intact'] + ans['intact_tail'] + ans['error_correction'] + ans['error_correction_tail']
+    ans['combine'] = set(ans['intact'] + ans['intact_tail'] + ans['error_correction'] + ans['error_correction_tail'] + ans['fuzzy'])
     return ans
 
 
