@@ -1,6 +1,10 @@
 # 简易拼音输入法（拼音转汉字）
 
-## 一、拼音划分
+## 一、使用介绍
+
+以下是具体实现过程的介绍。
+
+## 二、拼音划分
 
 首先要解决的问题是，如何对长拼音序列进行划分。
 
@@ -8,7 +12,7 @@
 
 - **普通情况**：完整的、无错的、没有歧义的拼音序列，例如 `kongqi` 只能划分为 `kong'qi`，即「空气」，并且是完整的、无错的、没有歧义的。这种情况处理起来比较简单，只需要按照「声母」和「韵母」的简单划分和匹配即可。
 - **拼音简写**：用户在输入的时候，往往不会输入完整的拼音，而是输入一部分拼音。而缩写的情况又有几种类别，由于没有输入法语料，我就按照我自己使用的简写方式频率排列，以「中国」举例如下：
-    - **先整后简**：`zhong'g`，我们在输入一个词语的时候，常常会输入了前一个字的完整拼音，又输入后一个字的开头拼音，输入法就会匹配到对应的词语，不需要输入完整的拼音。
+    - **先整后简**：`zhong'g`，也即「去尾字母完整划分」，我们在输入一个词语的时候，常常会输入了前一个字的完整拼音，又输入后一个字的开头拼音，输入法就会匹配到对应的词语，不需要输入完整的拼音。
     - **完全简写**：`z'g`，我们只输入词语的拼音首字母，也是比较常见的情况。
     - **先简后整**：`z'guo`，比较少见，一般出现在想要使用「完全简写」的方式输入，但是发现匹配不到，因此再输入后一个字的
     - **部分简写**：`zh'g`，不太常见，但是也存在这种情况。
@@ -19,9 +23,21 @@
 
 用户输入拼音序列划分只需要使用简单的动态规划即可实现，将所有合法的拼音序列划分方式都给列举出来，然后同时进行预测。
 
-首先是输入拼音序列的划分, 可以通过 `from pinyin.cut import cut_pinyin` 引入:
+首先是输入拼音序列的划分，可以通过 `from pinyin.cut import cut_pinyin` 引入，具体的实现代码如下，使用了简单的动态规划，并加入了使用 `'` 分词的功能：
 
 ```python
+# 加载完整拼音对应的拼音表 data/intact_pinyin.txt, 共 416 个
+intact_pinyin_set = set()
+with open('data/intact_pinyin.txt', 'r', encoding='utf-8') as f:
+    intact_pinyin_set = set(s for s in f.read().split('\n'))
+
+# 生成带残缺部分的拼音, 例如 'ruan' 对应的 'r', 'ru' 和 'rua', 共 504 个, 对应的拼音表为 data/all_pinyin.txt
+all_pinyin_set = set(s[:i] for s in intact_pinyin_set for i in range(1, len(s) + 1))
+
+# 用于保存动态规划答案的字典
+intact_cut_pinyin_ans = {}
+all_cut_pinyin_ans = {}
+# 动态规划判断进行拼音划分
 def cut_pinyin(pinyin: str, is_intact=False, is_break=True):
     '''
     进行拼音划分, 返回拼音划分结果列表
@@ -29,8 +45,88 @@ def cut_pinyin(pinyin: str, is_intact=False, is_break=True):
     is_intact: 拼音是否需要完整匹配, 默认为 False, 可以使用残缺部分的拼音进行分词
     is_break: 是否开启分隔符, 开启后可以使用 ' 进行分割, 例如 `kong'jian`
     
-    return: 拼音划分结果列表, 例如 `cut_pinyin('kongjian', True)` 会返回 `[('kong', 'jian'), ('kong', 'ji', 'an')]`
+    return: 拼音划分结果列表, 例如 `cut_pinyin('kongjian', True)`, 
+            会返回 `[('kong', 'jian'), ('kong', 'ji', 'an')]`
     '''
+    if is_intact:
+        pinyin_set = intact_pinyin_set
+        ans_dict = intact_cut_pinyin_ans    
+    else:
+        pinyin_set = all_pinyin_set
+        ans_dict = all_cut_pinyin_ans
+    # 如果保存有, 直接返回保存结果
+    if pinyin in ans_dict:
+        return ans_dict[pinyin]
+    # 如果 is_break, 就进行分割
+    if is_break and '\'' in pinyin:
+        pinyins = pinyin.split('\'')
+        components = [cut_pinyin(p, is_intact, False) for p in pinyins]
+        ans = components[0]
+        for i in range(1, len(components)):
+            ans = [p1 + p2 for p1 in ans for p2 in components[i]]
+        return ans
+    # 如果没有, 递归地动态规划生成
+    ans = [] if pinyin not in pinyin_set else [(pinyin,)]
+    for i in range(1, len(pinyin)):
+        # 进行划分 pinyin[:i], 如果是正确拼音, 就继续动态规划
+        if pinyin[:i] in pinyin_set:
+            appendices = cut_pinyin(pinyin[i:], is_intact, is_break=False)
+            for appendix in appendices:
+                ans.append((pinyin[:i],) + appendix)
+    ans_dict[pinyin] = ans
+    return ans
+```
+
+在 `cut_pinyin` 函数的基础上，我们可以加入拼音纠错功能，从第二个字母开始依次交换连续的两个字母，看看是否能够进行完整拼音划分，能的话就加入最终结果，进而实现纠错功能。
+
+```python
+def cut_pinyin_with_error_correction(pinyin: str):
+    '''
+    纠错匹配, 从第二个字母开始, 依次交换两个连续字母并进行*完整划分*.
+    如果完整划分返回非空列表, 即匹配成功, 并加入到返回字典中.
+    pinyin: 待纠错划分的拼音
+
+    return: 返回字典, 字典的 key 为纠错后的拼音序列, value 为匹配成功的划分结果.
+            并且会包含一个 key = 'all' 的项, 包括了所有 value.
+    '''
+    ans = {}
+    for i in range(1, len(pinyin) - 1):
+        key = pinyin[:i] + pinyin[i + 1] + pinyin[i] + pinyin[i + 2:]
+        value = cut_pinyin(key, is_intact=True)
+        if value:
+            ans[key] = value
+    ans['all'] = [p for t in ans.values() for p in t]
+    return ans
+```
+
+最后加入去尾字母划分功能，最后聚合一下，就实现了全部的输入拼音序列划分功能。
+
+```python
+def cut_pinyin_with_strategy(pinyin: str):
+    '''
+    使用各种策略对拼音进行划分, 其中包括:
+    1. 完整划分
+    2. 去尾字母完整划分
+    3. 纠错划分
+    4. 去尾字母纠错划分
+    5. 结果综合 (不含模糊划分)
+    6. 模糊划分
+
+    pinyin: 待划分的拼音
+    '''
+    ans = {
+        'intact': cut_pinyin(pinyin, is_intact=True),
+        'intact_tail': [] if pinyin[-1] not in all_pinyin_set 
+            else [t + (pinyin[-1],) for t in cut_pinyin(pinyin[:-1], is_intact=True)],
+        'error_correction': cut_pinyin_with_error_correction(pinyin)['all'],
+        'error_correction_tail': [] if pinyin[-1] not in all_pinyin_set 
+            else [t + (pinyin[-1],) for t in cut_pinyin_with_error_correction(pinyin[:-1])['all']],
+        'combine': [],
+        'fuzzy': cut_pinyin(pinyin, is_intact=False)
+    }
+    ans['combine'] = ans['intact'] + ans['intact_tail'] 
+        + ans['error_correction'] + ans['error_correction_tail']
+    return ans
 ```
 
 其次是文字转拼音后划分, 这时候拼音划分是已知的, 所以只需进行简写处理, 然后给不同简化方式 **划分权重** 即可.

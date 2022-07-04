@@ -1,9 +1,9 @@
-# 加载完整拼音对应的拼音表 data/all_pinyin.txt
+# 加载完整拼音对应的拼音表 data/intact_pinyin.txt, 共 416 个
 intact_pinyin_set = set()
-with open('data/all_pinyin.txt', 'r', encoding='utf-8') as f:
-    intact_pinyin_set = set(s for s in f.read().split('\n') if len(s) > 1) | {'a', 'o', 'e'}
+with open('data/intact_pinyin.txt', 'r', encoding='utf-8') as f:
+    intact_pinyin_set = set(s for s in f.read().split('\n'))
 
-# 生成带残缺部分的拼音, 例如 'ruan' 对应的 'r', 'ru' 和 'rua'
+# 生成带残缺部分的拼音, 例如 'ruan' 对应的 'r', 'ru' 和 'rua', 共 504 个, 对应的拼音表为 data/all_pinyin.txt
 all_pinyin_set = set(s[:i] for s in intact_pinyin_set for i in range(1, len(s) + 1))
 
 # 用于保存动态规划答案的字典
