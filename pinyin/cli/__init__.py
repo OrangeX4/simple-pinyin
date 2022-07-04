@@ -3,9 +3,10 @@
 '''
 命令行接口
 '''
-from pinyin.cut import cut_pinyin
 import sys
 sys.path.append('../')
+from pinyin.cut import cut_pinyin, cut_pinyin_with_error_correction
+from pinyin.ime import ime
 
 
 def main():
@@ -32,24 +33,43 @@ def main():
                 continue
             mode = mode_list[select_index]
         elif mode == 'pinyin':
-            # TODO: 拼音输入法
-            mode = 'select'
+            print('已进入智能拼音输入法模式, 输入 exit 退出')
+            while True:
+                pinyin = input('请输入拼音: ')
+                if pinyin == 'exit':
+                    mode = 'select'
+                    break
+                for t in ime(pinyin, 3):
+                    print(f"{t[1]} ({'-'.join(t[0])}): {t[2]}")
         elif mode == 'cut':
             # 如果是拼音划分模式, 则读取拼音内容, 进行处理
             print('已进入拼音划分模式, 输入 change 切换划分方式, 输入 exit 退出')
-            is_intact = True
+            cut_mode = '精确'
             while True:
                 pinyin = input('输入拼音: ')
                 if pinyin == 'exit':
                     mode = 'select'
                     break
                 elif pinyin == 'change':
-                    is_intact = not is_intact
-                    print(f'当前划分方式: {"精确" if is_intact else "模糊"}')
+                    if cut_mode == '精确':
+                        cut_mode = '模糊'
+                    elif cut_mode == '模糊':
+                        cut_mode = '纠错'
+                    else:
+                        cut_mode = '精确'
+                    print(f'当前划分方式: {cut_mode}')
                 else:
                     # 输出拼音划分结果
-                    print('划分结果: ' + str(['\''.join(t)
-                          for t in cut_pinyin(pinyin, is_intact)]))
+                    if cut_mode == '精确':
+                        print('划分结果: ' + str(['\''.join(t)
+                            for t in cut_pinyin(pinyin, is_intact=True)]))
+                    elif cut_mode == '模糊':
+                        print('划分结果: ' + str(['\''.join(t)
+                            for t in cut_pinyin(pinyin, is_intact=False)]))
+                    else:
+                        print('划分结果:')
+                        for k, v in cut_pinyin_with_error_correction(pinyin).items():
+                            print(k + ': ' + str(['\''.join(t) for t in v]))
         elif mode == 'exit':
             print('退出程序')
             break
