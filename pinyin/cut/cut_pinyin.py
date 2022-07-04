@@ -1,3 +1,8 @@
+'''
+Author: OrangeX4
+Date: 2022-07-04
+'''
+
 # 加载完整拼音对应的拼音表 data/intact_pinyin.txt, 共 416 个
 intact_pinyin_set = set()
 with open('data/intact_pinyin.txt', 'r', encoding='utf-8') as f:

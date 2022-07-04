@@ -130,3 +130,54 @@ def cut_pinyin_with_strategy(pinyin: str):
 ```
 
 其次是文字转拼音后划分, 这时候拼音划分是已知的, 所以只需进行简写处理, 然后给不同简化方式 **划分权重** 即可.
+
+
+## 三、获取语料
+
+这里我们直接使用了「北京语言大学 BCC 语料库 http://bcc.blcu.edu.cn」的词频语料 `global_wordfreq.release.txt`，最终解释权归北语大数据与教育技术研究所所有。
+
+其中的语料格式大致为：
+
+```text
+第	2002074595
+的	943370349
+了	255733044
+在	197672850
+是	171296602
+我	169391220
+~	44057380
+非常	8056541
+一直	8013106
+不会	8010572
+应该	8001472
+```
+
+即「词语 + 词频」的组合，不过注意到有一些非中文的词语，例如 `~	44057380`，因此我们需要进行过滤，最后再使用 Python 的生成器功能，我们就能解耦合地进行数据的读入，具体代码位于 `train/dataset.py`。
+
+```python
+def is_Chinese(word):
+    '''
+    判断一个字符串是否全由汉字组成, 用于过滤文本
+    '''
+    for ch in word:
+        if '\u4e00' <= ch <= '\u9fff':
+            return True
+    return False
+
+def iter_word_and_freq():
+    """
+    词频数据集, 迭代地返回 (word, freq)
+    """
+    with open(words_path, 'r', ) as f:
+        for line in f:
+            word, frequency = line.split()
+            # 进行过滤
+            if is_Chinese(word):
+                yield word, int(frequency)
+```
+
+
+
+## 四、训练隐马尔可夫模型
+
+
