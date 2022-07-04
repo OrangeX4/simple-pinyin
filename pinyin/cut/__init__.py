@@ -9,5 +9,6 @@ from pinyin.cut.cut_pinyin import (
     all_pinyin_set,
     cut_pinyin,
     cut_pinyin_with_error_correction,
-    cut_pinyin_with_strategy
+    cut_pinyin_with_strategy,
+    normlize_pinyin
 )

@@ -103,6 +103,14 @@ def cut_pinyin_with_strategy(pinyin: str):
     return ans
 
 
+def normlize_pinyin(pinyin: str):
+    """
+    规范化拼音
+    将所有 ue 转化为 ve
+    """
+    return pinyin.replace('ue', 've', -1)
+
+
 if __name__ == '__main__':
     # print(cut_pinyin('kongjian', True))
     assert cut_pinyin('kongjian', True) == [('kong', 'jian'), ('kong', 'ji', 'an')]

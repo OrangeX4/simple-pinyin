@@ -6,8 +6,26 @@ HMM 模型训练, 结果保存在 data 中.
 最终解释权归北语大数据与教育技术研究所所有.
 '''
 
+import sys
+sys.path.append('../')
+
 from pinyin.train.dataset import (
     iter_word_and_freq
 )
-# from pinyin.train.hmm import 
+from pinyin.train.train_hmm import (
+    set_config,
+    gen_start,
+    gen_transition,
+    gen_emission
+)
+
+if __name__ == '__main__':
+    print('Start training HMM model...')
+    print('Generate start vector...')
+    gen_start()
+    print('Generate transition matrix...')
+    gen_transition()
+    print('Generate emission matrix...')
+    gen_emission()
+    print('Done.')
 

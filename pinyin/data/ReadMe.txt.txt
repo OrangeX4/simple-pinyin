@@ -1,11 +1,11 @@
-±¾´Ê±íÀ´×ÔBCCÓïÁÏ¿âººÓï²¿·ÖµÄ±¨¿¯£¨news£©¡¢¿Æ¼¼£¨technology£©¡¢²©¿Í£¨blog£©¡¢Î¢²©£¨weibo£©ºÍÎÄÑ§£¨literature£©¼¸¸öÆµµÀ¡£GlobalÎª´ËÎå¸öÆµµÀºÏ²¢ºóµÄÈ«¾Ö´Ê±í¡£
+æœ¬è¯è¡¨æ¥è‡ªBCCè¯­æ–™åº“æ±‰è¯­éƒ¨åˆ†çš„æŠ¥åˆŠï¼ˆnewsï¼‰ã€ç§‘æŠ€ï¼ˆtechnologyï¼‰ã€åšå®¢ï¼ˆblogï¼‰ã€å¾®åšï¼ˆweiboï¼‰å’Œæ–‡å­¦ï¼ˆliteratureï¼‰å‡ ä¸ªé¢‘é“ã€‚Globalä¸ºæ­¤äº”ä¸ªé¢‘é“åˆå¹¶åŽçš„å…¨å±€è¯è¡¨ã€‚
 
-´Ê±í¼ôÖ¦Æµ´ÎÎª10¡£Î´È¥³ý×ÖÄ¸´Ê¡£´æÔÚ²¿·ÖÊýÁ¿´Ê²ÐÁô¡£
+è¯è¡¨å‰ªæžé¢‘æ¬¡ä¸º10ã€‚æœªåŽ»é™¤å­—æ¯è¯ã€‚å­˜åœ¨éƒ¨åˆ†æ•°é‡è¯æ®‹ç•™ã€‚
 
-±¾´Ê±í½ö¹©Ñ§ÊõÊ¹ÓÃ¡£ÒýÓÃÇë×¢Ã÷¡°±±¾©ÓïÑÔ´óÑ§BCCÓïÁÏ¿âhttp://bcc.blcu.edu.cn¡±ºÍÎÄÏ×£¨ÒÔbccÍøÕ¾µÄ×îÐÂÒýÓÃËµÃ÷Îª×¼£©¡£×îÖÕ½âÊÍÈ¨¹é±±Óï´óÊý¾ÝÓë½ÌÓý¼¼ÊõÑÐ¾¿ËùËùÓÐ¡£
+æœ¬è¯è¡¨ä»…ä¾›å­¦æœ¯ä½¿ç”¨ã€‚å¼•ç”¨è¯·æ³¨æ˜Žâ€œåŒ—äº¬è¯­è¨€å¤§å­¦BCCè¯­æ–™åº“http://bcc.blcu.edu.cnâ€å’Œæ–‡çŒ®ï¼ˆä»¥bccç½‘ç«™çš„æœ€æ–°å¼•ç”¨è¯´æ˜Žä¸ºå‡†ï¼‰ã€‚æœ€ç»ˆè§£é‡Šæƒå½’åŒ—è¯­å¤§æ•°æ®ä¸Žæ•™è‚²æŠ€æœ¯ç ”ç©¶æ‰€æ‰€æœ‰ã€‚
 
 
-±±¾©ÓïÑÔ´óÑ§¡¤ÐÅÏ¢¿ÆÑ§Ñ§Ôº¡¤´óÊý¾ÝÓë½ÌÓý¼¼ÊõÑÐ¾¿Ëù
-2015Äê10ÔÂ
+åŒ—äº¬è¯­è¨€å¤§å­¦Â·ä¿¡æ¯ç§‘å­¦å­¦é™¢Â·å¤§æ•°æ®ä¸Žæ•™è‚²æŠ€æœ¯ç ”ç©¶æ‰€
+2015å¹´10æœˆ
 
-ÁªÏµÈË£ºÜ÷¶÷¶«£¬edxun@126.com
+è”ç³»äººï¼šè€æ©ä¸œï¼Œedxun@126.com

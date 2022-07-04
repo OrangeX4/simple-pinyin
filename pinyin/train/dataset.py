@@ -3,6 +3,7 @@
 '''
 
 words_path = './data/test_words.txt'
+# words_path = './data/global_wordfreq.release.txt'
 
 def set_words_path(path):
     global words_path
@@ -21,9 +22,12 @@ def iter_word_and_freq():
     """
     词频数据集, 迭代地返回 (word, freq)
     """
-    with open(words_path, 'r', ) as f:
+    with open(words_path, 'r', encoding='utf-8') as f:
         for line in f:
-            word, frequency = line.split()
-            # 进行过滤
-            if is_Chinese(word):
-                yield word, int(frequency)
+            try:
+                word, frequency = line.split()
+                # 进行过滤
+                if is_Chinese(word):
+                    yield word, int(frequency)
+            except Exception as e:
+                pass
