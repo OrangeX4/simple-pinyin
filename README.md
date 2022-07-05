@@ -327,7 +327,7 @@ def viterbi(pinyin, limit=10):
     """
     viterbi 算法
 
-    pinyin: 拼音元组
+    pinyin: 拼音元组, 例如 ('jin', 'tian')
 
     return: 返回 limit 个最可能的汉字序列, 但是是 1 个全局最优解和 limit - 1 个局部最优解
     """
@@ -342,7 +342,7 @@ def viterbi(pinyin, limit=10):
         prob_map = {}
         for phrase, prob in V.items():
             previous = phrase[-1]
-            if py in reversed_transition_matrix[previous]:
+            if previous in reversed_transition_matrix and py in reversed_transition_matrix[previous]:
                 state, new_prob = reversed_transition_matrix[previous][py]
                 prob_map[phrase + state] = new_prob + prob
 
@@ -369,10 +369,8 @@ def ime(pinyin: str, limit=7):
     # 获取分词结果
     cut = cut_pinyin_with_strategy(normlize_pinyin(pinyin))
     for pinyin in cut['combine']:
-        try:
-            result.extend([(pinyin,) + t for t in viterbi(pinyin)])
-        except Exception as e:
-            pass
+        vit = viterbi(pinyin)
+        result.extend([(pinyin,) + t for t in vit])
     # 排序并取出前 limit 个
     dp[pinyin] = sorted(result, key=lambda x: x[2], reverse=True)
     return dp[pinyin][:limit]

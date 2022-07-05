@@ -42,7 +42,7 @@ def viterbi(pinyin, limit=10):
         prob_map = {}
         for phrase, prob in V.items():
             previous = phrase[-1]
-            if py in reversed_transition_matrix[previous]:
+            if previous in reversed_transition_matrix and py in reversed_transition_matrix[previous]:
                 state, new_prob = reversed_transition_matrix[previous][py]
                 prob_map[phrase + state] = new_prob + prob
 
