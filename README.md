@@ -75,6 +75,53 @@ print(ime('nanjingdx', limit=1))  # 南京大学
 [(('nan', 'jing', 'd', 'x'), '南京大学', -17.561359659026092)]
 ```
 
+Python 的项目结构为：
+
+```text
+.
+├── __init__.py
+├── cli  # 命令行模式
+│   ├── __init__.py
+├── cut  # 拼音划分代码
+│   ├── __init__.py
+│   └── cut_pinyin.py
+├── data  # 数据保存位置
+│   ├── ReadMe.txt.txt
+│   ├── all_pinyin.txt
+│   ├── checkpoints
+│   │   ├── hmm_emission_counter.json
+│   │   ├── hmm_start_counter.json
+│   │   └── hmm_transition_counter.json
+│   ├── emoji.json
+│   ├── emoji.txt
+│   ├── global_wordfreq.release.txt
+│   ├── hmm_emission.json
+│   ├── hmm_reversed_emission.json
+│   ├── hmm_reversed_transition.json
+│   ├── hmm_start.json
+│   ├── hmm_transition.json
+│   ├── intact_pinyin.txt
+│   └── test_words.txt
+├── hmm  # 隐马尔可夫模型
+│   ├── __init__.py
+│   └── viterbi.py
+├── ime  # 输入法函数
+│   ├── __init__.py
+│   ├── emoji.py  # emoji 处理及加载
+│   └── ime.py
+├── requirements.txt
+├── server  # 服务器
+│   ├── __init__.py
+├── tests  # 单元测试
+│   ├── __init__.py
+│   ├── test_cut_pinyin.py
+│   └── test_viterbi.py
+└── train  # 隐马尔可夫模型训练
+    ├── __init__.py
+    ├── dataset.py  # 加载数据
+    └── train_hmm.py  # 具体训练代码
+```
+
 以下是具体实现过程的介绍。
 
 ## 二、拼音划分
