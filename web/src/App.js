@@ -27,6 +27,22 @@ function Copyright() {
 
 const theme = createTheme();
 
+// 保存结果
+const get_pinyin_cache = {}
+function get_pinyin(pinyin, callback) {
+  if (get_pinyin_cache[pinyin]) {
+    callback(get_pinyin_cache[pinyin])
+  }
+  fetch(`http://localhost:3366/?pinyin=${pinyin}&limit=7`).then(
+    (response) => {
+      response.json().then((data) => {
+        get_pinyin_cache[pinyin] = data
+        callback(data)
+      })
+    }
+  )
+}
+
 export default function App() {
   // pinyin
   const [pinyin, setPinyin] = React.useState('');
@@ -36,14 +52,19 @@ export default function App() {
   const updatePinyin = (value) => {
     if (value) {
       setPinyin(value)
-      setList(["你好", "你号", "拟好", "拟好", "拟好", "拟好", "拟好"])
+      // GET http://localhost:3366/?pinyin=a&limit=7
+      get_pinyin(value, (data) => {
+        if (data.status === 'success') {
+          setList(data.result)
+        }
+      })
     } else {
       setPinyin('')
       setList([])
     }
   }
   const handleListClick = (index) => {
-    setText(text + list[index])
+    setText(text + list[index].word)
     updatePinyin('')
   }
 
@@ -58,6 +79,11 @@ export default function App() {
       event.preventDefault()
       updatePinyin(pinyin + event.key)
     }
+    // 分词符号 '
+    if (event.keyCode === 222) {
+      event.preventDefault()
+      updatePinyin(pinyin + '\'')
+    }
     // backspace，退格
     if (event.keyCode === 8) {
       if (pinyin.length > 0) {
@@ -69,7 +95,7 @@ export default function App() {
     if (event.keyCode >= 49 && event.keyCode <= 57) {
       if (parseInt(event.key) <= list.length) {
         event.preventDefault()
-        setText(text + list[parseInt(event.key) - 1])
+        setText(text + list[parseInt(event.key) - 1].word)
         updatePinyin('')
       }
     }
@@ -77,7 +103,7 @@ export default function App() {
     if (event.key === 'Enter' || event.key === ' ') {
       if (list.length) {
         event.preventDefault()
-        setText(text + list[0])
+        setText(text + list[0].word)
         updatePinyin('')
       }
     }
@@ -126,7 +152,7 @@ export default function App() {
                   <InputLabel htmlFor="filled-adornment">拼音输入法</InputLabel>
                   <FilledInput
                     id="filled-adornment"
-                    value={pinyin}
+                    value={list.length > 0 ? list[0].pinyin : pinyin}
                     onKeyDown={handleKeydown}
                     endAdornment={
                       <InputAdornment position="end">
@@ -165,7 +191,7 @@ export default function App() {
                             {index ? <Divider /> : null}
                             <ListItem key={index} disablePadding>
                               <ListItemButton onClick={(e) => handleListClick(index)}>
-                                <ListItemText primary={(index+1) + ". " + item} />
+                                <ListItemText primary={(index+1) + ". " + item.word} />
                               </ListItemButton>
                             </ListItem>
                           </>
