@@ -402,3 +402,75 @@ if __name__ == '__main__':
 ```
 
 
+## 五、输入 Emoji
+
+我从 https://www.emojiall.com/zh-hans/all-emojis 中获取了所有的中文和 emoji 的对应数据，保存在了 `data/emoji.txt` 中。通过代码
+
+```python
+def gen_emoji_json():
+    emoji_dict = {}
+    with open(emoji_file_path, 'r', encoding='utf-8') as f:
+        emoji = ''
+        for line in f:
+            line = line.strip()
+            # 跳过数字
+            if all(ch in '1234567890' for ch in line):
+                continue
+            if emoji:
+                # 去除前缀
+                if line.startswith('旗: '):
+                    line = line[3:]
+                emoji_dict[line] = emoji
+                emoji = ''
+            else:
+                emoji = line
+
+    # save to data/emoji.json
+    with open(emoji_json_path, 'w', encoding='utf-8') as f:
+        json.dump(emoji_dict, f, ensure_ascii=False, indent=4)
+
+
+def load_emoji_dict():
+    return json.load(open(emoji_json_path, 'r', encoding='utf-8'))
+```
+
+我生成了如下格式的 emoji 字典，即中文和 emoji 的对应表：
+
+```json
+{
+    "笑脸": "😄",
+    "苦笑": "😅",
+    "斜眼笑": "😆",
+    "微笑天使": "😇",
+    "呵呵": "🙂",
+    "倒脸": "🙃",
+    "笑得满地打滚": "🤣",
+    "表情脸": "😍",
+    "花痴": "😍",
+    "亲亲": "😗",
+    "飞吻": "😘",
+    "吐舌脸": "😛",
+    "好吃": "😋",
+    "想一想": "🤔",
+}
+```
+
+最后我们更新一下 `ime()` 函数，如果第一个中文有对应 emoji 则在第二位加入 emoji 即可。
+
+```python
+def ime(pinyin: str, limit=7):
+    '''
+    输入法函数, 综合分词和维特比算法的最终结果, 并且会加入 emoji
+    '''
+    def replace_with_emoji(tuples):
+        '''
+        如果第一个中文有对应 emoji, 则使用 emoji 将其替换
+        '''
+        if tuples and tuples[0][1] in emoji_dict:
+            return [tuples[0], (tuples[0][0], emoji_dict[tuples[0][1]], tuples[0][2] - 1e-5)] + tuples[1:-1]
+        else:
+            return tuples
+    
+    if pinyin in dp:
+        return replace_with_emoji(dp[pinyin][:limit])
+```
