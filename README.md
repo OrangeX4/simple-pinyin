@@ -92,7 +92,7 @@ def cut_pinyin_with_error_correction(pinyin: str):
     ans = {}
     for i in range(1, len(pinyin) - 1):
         # 避免交换分词符
-        if pinyin[i] == '\'' or pinyin[i + 1] == ' ':
+        if pinyin[i-1] == '\'' or pinyin[i] == '\'' or pinyin[i + 1] == '\'':
             continue
         key = pinyin[:i] + pinyin[i + 1] + pinyin[i] + pinyin[i + 2:]
         value = cut_pinyin(key, is_intact=True)

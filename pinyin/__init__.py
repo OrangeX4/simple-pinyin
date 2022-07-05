@@ -14,7 +14,8 @@ def main():
         from pinyin.cli import main as cli_main
         cli_main()
     elif mode == 'server':
-        import pinyin.server
+        from pinyin.server import main as server_main
+        server_main()
     else:
         print('未知模式')
 
