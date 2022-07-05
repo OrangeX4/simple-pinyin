@@ -2,6 +2,14 @@
 
 ## 一、使用介绍
 
+在线网址：http://1.15.246.22:3367/
+
+代码 Repo：https://github.com/OrangeX4/simple-pinyin
+
+```sh
+git clone https://github.com/OrangeX4/simple-pinyin.git
+```
+
 首先要安装依赖：
 
 ```sh
@@ -25,7 +33,7 @@ python ./__init__.py
 
 然后输入 `cli` 就能进入命令行模式的拼音输入法了。
 
-![](images/2022-07-05-13-37-49.png)
+![](https://picgo-1258602555.cos.ap-nanjing.myqcloud.com/2022-07-05-13-37-49.png)
 
 其次是 **前端模式**：
 
@@ -45,7 +53,7 @@ npm run start
 
 就能启动一个前端界面了：
 
-![](images/2022-07-05-13-28-32.png)
+![](https://picgo-1258602555.cos.ap-nanjing.myqcloud.com/2022-07-05-13-28-32.png)
 
 当然你也可以选择 **在 Python 中导入该输入法** 并使用：
 
@@ -314,7 +322,7 @@ def iter_word_and_freq():
 
 隐马尔可夫模型有两个关键的概念：**状态** (state) 和 **观测** (observation)。隐马尔可夫链随机生成的状态的序列，称为状态序列；每个状态生成一个观测，由此产生的随机的观测的序列，称为观测序列。序列的每一个位置又可以看作一个时刻。
 
-![](images/2022-07-04-20-23-37.png)
+![](https://picgo-1258602555.cos.ap-nanjing.myqcloud.com/2022-07-04-20-23-37.png)
 
 对于拼音输入法来说，**状态就是一个个汉字**，**观测就是对应的拼音**。作为状态的汉字是不知道的，唯一知道的只有用户输入的观测，也就是拼音。
 
@@ -600,7 +608,7 @@ def ime(pinyin: str, limit=7):
 
 Web 前端采用了 React 框架，个人比较喜欢 Google 家的 Material Design，因此选用了 MUI，一款基于 React 框架的 Material 组件库。
 
-![](images/2022-07-05-13-28-32.png)
+![](https://picgo-1258602555.cos.ap-nanjing.myqcloud.com/2022-07-05-13-28-32.png)
 
 整个 UI 界面非常简单，由三个主要部分组成。
 
@@ -608,7 +616,7 @@ Web 前端采用了 React 框架，个人比较喜欢 Google 家的 Material Des
 2. 位于左下方的推荐词列表，最多显示 7 个。其中还包括匹配 emoji 的显示。
 3. 位于右边的文本输入框，会捕获按键并同步输入法输入的内容，可以用于测试输入法的效果。
 
-![](images/2022-07-05-13-29-51.png)
+![](https://picgo-1258602555.cos.ap-nanjing.myqcloud.com/2022-07-05-13-29-51.png)
 
 前端具体的代码比较繁杂，这里也不过多赘述。
 
