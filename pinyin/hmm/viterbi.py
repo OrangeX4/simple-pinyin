@@ -30,6 +30,7 @@ def viterbi(pinyin, limit=10):
     pinyin: 拼音元组, 例如 ('jin', 'tian')
 
     return: 返回 limit 个最可能的汉字序列, 但是是 1 个全局最优解和 limit - 1 个局部最优解
+            并且返回剩余未搜索的拼音
     """
     # 初始化, 找出第一个拼音对应的汉字以及 start 和 emission 概率之积 (对数下为相加)
     char_and_prob = ((ch, start_vector[ch] + reversed_emission_matrix[pinyin[0]][ch]) for ch in reversed_emission_matrix[pinyin[0]])
@@ -49,8 +50,9 @@ def viterbi(pinyin, limit=10):
         if prob_map:
             V = prob_map
         else:
-            return V
-    return sorted(V.items(), key=lambda x: x[1], reverse=True)
+            # 没有概率, 因此没有完全搜索, 返回目前结果和未搜索拼音 pinyin[i:]
+            return sorted(V.items(), key=lambda x: x[1], reverse=True), pinyin[i:]
+    return sorted(V.items(), key=lambda x: x[1], reverse=True), ''
 
 
 if __name__ == '__main__':

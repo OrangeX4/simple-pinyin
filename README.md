@@ -330,6 +330,7 @@ def viterbi(pinyin, limit=10):
     pinyin: 拼音元组, 例如 ('jin', 'tian')
 
     return: 返回 limit 个最可能的汉字序列, 但是是 1 个全局最优解和 limit - 1 个局部最优解
+            并且返回剩余未搜索的拼音
     """
     # 初始化, 找出第一个拼音对应的汉字以及 start 和 emission 概率之积 (对数下为相加)
     char_and_prob = ((ch, start_vector[ch] + reversed_emission_matrix[pinyin[0]][ch]) for ch in reversed_emission_matrix[pinyin[0]])
@@ -349,8 +350,9 @@ def viterbi(pinyin, limit=10):
         if prob_map:
             V = prob_map
         else:
-            return V
-    return sorted(V.items(), key=lambda x: x[1], reverse=True)
+            # 没有概率, 因此没有完全搜索, 返回目前结果和未搜索拼音 pinyin[i:]
+            return sorted(V.items(), key=lambda x: x[1], reverse=True), pinyin[i:]
+    return sorted(V.items(), key=lambda x: x[1], reverse=True), ''
 ```
 
 最后综合我们的分词功能和维特比算法，即可得到一个较为智能的输入法了。
@@ -368,9 +370,22 @@ def ime(pinyin: str, limit=7):
     result = []
     # 获取分词结果
     cut = cut_pinyin_with_strategy(normlize_pinyin(pinyin))
-    for pinyin in cut['combine']:
-        vit = viterbi(pinyin)
-        result.extend([(pinyin,) + t for t in vit])
+    # 先尝试完整划分
+    for pinyin in cut['intact'] + cut['intact_tail']:
+        vit, remain_pinyin = viterbi(pinyin)
+        if not remain_pinyin:
+            result.extend([(pinyin,) + t for t in vit])
+    # 如果完整划分的最小拼音大小小于等于 3, 则进行纠错
+    if not result or min([len(pinyin) for pinyin in cut['intact'] + cut['intact_tail']]) <= 3:
+        for pinyin in cut['error_correction'] + cut['error_correction_tail']:
+            vit, remain_pinyin = viterbi(pinyin)
+            if not remain_pinyin:
+                result.extend([(pinyin,) + t for t in vit])
+    # 如果结果为空, 则进行模糊划分
+    if not result:
+        for pinyin in cut['fuzzy']:
+            vit, remain_pinyin = viterbi(pinyin)
+            result.extend([(pinyin,) + t for t in vit])
     # 排序并取出前 limit 个
     dp[pinyin] = sorted(result, key=lambda x: x[2], reverse=True)
     return dp[pinyin][:limit]
@@ -382,6 +397,8 @@ if __name__ == '__main__':
     print(ime('ji\'ntian'))  # 分词功能
     print(ime('jintiantianqibucuo'))  # 短句功能
     print(ime('jttqbc'))  # 首字母功能
+    print(ime('nanjingdaxuerengongzhinengxueyuan'))  # 南京大学人工智能学院
+    print(ime('nanjingdx'))  # 南京大学
 ```
 
 

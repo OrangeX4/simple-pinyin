@@ -13,6 +13,7 @@ from pypinyin import pinyin as get_pinyin, NORMAL
 from tqdm import tqdm
 # 用于加载词频数据
 from pinyin.train.dataset import iter_word_and_freq
+from pinyin.cut import normlize_pinyin
 import json
 
 # 以 JSON 格式保存稀疏矩阵的路径
@@ -115,6 +116,7 @@ def gen_emission():
             if ch not in emission_counter:
                 emission_counter[ch] = {}
             for py in pinyins:
+                py = normlize_pinyin(py)
                 def add_to_counter(x, weight):
                     emission_counter[ch][x] = emission_counter[ch].get(x, 0) + \
                                         weight * freq // count_of_pinyins            
