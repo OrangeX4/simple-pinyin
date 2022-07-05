@@ -50,14 +50,14 @@ def ime(pinyin: str, limit=7):
 
 
 if __name__ == '__main__':
-    print(ime('jintian'))  # 基础功能
-    print(ime('jintain'))  # 纠错功能
-    print(ime('ji\'ntian'))  # 分词功能
-    print(ime('jintiantianqibucuo'))  # 短句功能
-    print(ime('jttqbc'))  # 首字母功能
-    print(ime('xiaolian'))  # emoji 功能
-    print(ime('nanjingdaxuerengongzhinengxueyuan'))  # 南京大学人工智能学院
-    print(ime('nanjingdx'))  # 南京大学
+    print(ime('jintian', limit=1))  # 基础功能
+    print(ime('jintain', limit=1))  # 纠错功能
+    print(ime('ji\'ntian', limit=1))  # 分词功能
+    print(ime('jintiantianqibucuo', limit=1))  # 短句功能
+    print(ime('jttqbc', limit=1))  # 首字母功能
+    print(ime('xiaolian', limit=1))  # emoji 功能
+    print(ime('nanjingdaxuerengongzhinengxueyuan', limit=1))  # 南京大学人工智能学院
+    print(ime('nanjingdx', limit=1))  # 南京大学
 
 
 
