@@ -2,8 +2,6 @@
 
 ## 一、使用介绍
 
-在线网址：http://1.15.246.22:3367/
-
 代码 Repo：https://github.com/OrangeX4/simple-pinyin
 
 ```sh
